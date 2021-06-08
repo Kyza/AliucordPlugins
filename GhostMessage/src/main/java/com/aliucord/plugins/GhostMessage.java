@@ -67,7 +67,7 @@ public class GhostMessage extends Plugin {
 			}
 		}));
 
-		// Bad. Doesn't detect switch to DMs.
+		// Bad. Doesn't detect switch to DMs or guilds.
 		patcher.patch("com.discord.utilities.channel.ChannelSelector$gotoChannel$1", "invoke", new Class[]{}, new PinePatchFn(callFrame -> {
 			if (!this.sets.getBool("permanent", false) && this.sets.getBool("enabled", false)) {
 				this.sets.setBool("enabled", false);
