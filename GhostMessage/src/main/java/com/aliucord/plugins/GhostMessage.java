@@ -26,7 +26,7 @@ public class GhostMessage extends Plugin {
 		Manifest manifest = new Manifest();
 		manifest.authors = new Manifest.Author[]{ new Manifest.Author("Kyza", 220584715265114113L) };
 		manifest.description = "Deletes all messages you send immediately.";
-		manifest.version = "1.0.0";
+		manifest.version = "1.0.1";
 		manifest.updateUrl = "https://raw.githubusercontent.com/Kyza/AliucordPlugins/builds/updater.json";
 		return manifest;
 	}
