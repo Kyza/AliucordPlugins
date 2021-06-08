@@ -24,7 +24,7 @@ jobs:
       uses: actions/checkout@master
       with:
         repository: 'Aliucord/Aliucord'
-        path: 'repo'
+        path: '../Aliucord'
         token: ${{ secrets.ACCESS_TOKEN }}
         
     - name: ls
