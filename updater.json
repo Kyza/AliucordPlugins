@@ -6,6 +6,6 @@
     "default": {
         "minimumDiscordVersion": 79201,
         "version": "1.0.0",
-        "build": "https://raw.githubusercontent.com/Kyza/AliucordPlugins/builds/%s.apk"
+        "build": "https://raw.githubusercontent.com/Kyza/AliucordPlugins/builds/%s.zip"
     }
 }
