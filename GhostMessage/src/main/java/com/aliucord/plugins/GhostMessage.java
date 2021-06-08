@@ -1,7 +1,6 @@
 package com.aliucord.plugins;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -11,13 +10,10 @@ import com.aliucord.entities.Plugin;
 import com.aliucord.Logger;
 
 import com.aliucord.patcher.PinePatchFn;
-import com.discord.api.channel.Channel;
 import com.discord.api.commands.ApplicationCommandType;
 import com.discord.models.commands.ApplicationCommandOption;
 
 import com.discord.stores.StoreStream;
-
-import com.discord.utilities.channel.ChannelSelector;
 
 import java.util.*;
 
