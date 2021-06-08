@@ -26,6 +26,9 @@ jobs:
         repository: 'Aliucord/Aliucord'
         path: 'repo'
         token: ${{ secrets.ACCESS_TOKEN }}
+        
+    - name: ls
+      run: ls
 
     - name: Setup JDK 1.8
       uses: actions/setup-java@v1
