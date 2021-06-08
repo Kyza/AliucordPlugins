@@ -45,13 +45,10 @@ public class GhostMessage extends Plugin {
 			this.sets.setBool("permanent", permanent);
 
 			if (enabled) {
-				this.logger.info("Enabled.");
-				Utils.showToast(context, "Enabled Ghost Message.");
+				this.logger.info(context, "Enabled Ghost Message.");
 				return new CommandsAPI.CommandResult("Enabled Ghost Message.", null, false);
 			}
-
-			this.logger.info("Disabled.");
-			Utils.showToast(context, "Disabled Ghost Message.");
+			this.logger.info(context, "Disabled Ghost Message.");
 			return new CommandsAPI.CommandResult("Disabled Ghost Message.", null, false);
 		});
 
@@ -71,7 +68,7 @@ public class GhostMessage extends Plugin {
 		patcher.patch("com.discord.utilities.channel.ChannelSelector$gotoChannel$1", "invoke", new Class[]{}, new PinePatchFn(callFrame -> {
 			if (!this.sets.getBool("permanent", false) && this.sets.getBool("enabled", false)) {
 				this.sets.setBool("enabled", false);
-				Utils.showToast(context, "Disabled Ghost Message automatically.");
+				this.logger.info(context, "Disabled Ghost Message automatically.");
 			}
 		}));
 	}
