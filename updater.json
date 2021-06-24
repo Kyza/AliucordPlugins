@@ -1,6 +1,6 @@
 {
     "GhostMessage": {
-        "version": "1.0.3",
+        "version": "1.0.4",
         "minimumDiscordVersion": 80202
     },
     "default": {
