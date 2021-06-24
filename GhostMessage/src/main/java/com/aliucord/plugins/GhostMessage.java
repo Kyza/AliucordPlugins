@@ -35,41 +35,46 @@ public class GhostMessage extends Plugin {
 		Manifest manifest = new Manifest();
 		manifest.authors = new Manifest.Author[]{ new Manifest.Author("Kyza", 220584715265114113L) };
 		manifest.description = "Deletes all messages you send immediately.";
-		manifest.version = "1.0.3";
+		manifest.version = "1.0.4";
 		manifest.updateUrl = "https://raw.githubusercontent.com/Kyza/AliucordPlugins/builds/updater.json";
 		return manifest;
 	}
 
 	@Override
 	public void start(Context context) {
-		this.commands.registerCommand("ghostmessage", "Enables or disables Ghost Message.", arguments, args -> {
-			Boolean enabled = (Boolean)args.get("enabled");
-			Boolean permanent = (Boolean)this.nullish(args.get("permanent"), false);
+		this.commands.registerCommand("ghostmessage", "Enables or disables GhostMessage.", arguments, args -> {
+			boolean enabled = (boolean)args.get("enabled");
+			boolean permanent = (boolean)this.nullish(args.get("permanent"), false);
 
-			this.sets.setBool("enabled", enabled);
 			this.sets.setBool("permanent", permanent);
+			this.toggleGhosts(enabled);
 
-			if (enabled) {
-				this.enableGhosts();
-				this.logger.info(Utils.appActivity, "Enabled Ghost Message.");
-				return new CommandsAPI.CommandResult(null, null, false);
-			}
-			this.disableGhosts();
-			this.logger.info(Utils.appActivity, "Disabled Ghost Message.");
 			return new CommandsAPI.CommandResult(null, null, false);
 		});
 
 		if (this.sets.getBool("enabled", false)) {
-			this.enableGhosts();
+			this.toggleGhosts(true);
 		}
 	}
 
 	private PinePatchFn onNavigate = new PinePatchFn(callFrame -> {
 		if (this.sets.getBool("enabled", false) && !this.sets.getBool("permanent", false)) {
 			this.sets.setBool("enabled", false);
-			this.logger.info(Utils.appActivity, "Disabled Ghost Message automatically.");
+			this.toggleGhosts(false, true);
 		}
 	});
+
+	private void toggleGhosts(boolean enable) {
+		this.toggleGhosts(enable, false);
+	}
+	private void toggleGhosts(boolean enable, boolean automatically) {
+		this.sets.setBool("enabled", enable);
+		if (enable) {
+			this.enableGhosts();
+		} else {
+			this.disableGhosts(automatically);
+		}
+	}
 
 	private void enableGhosts() {
 		this.messagesSubscription = RxUtils.subscribe(RxUtils.onBackpressureBuffer(StoreStream.getGatewaySocket().getMessageCreate()), RxUtils.createActionSubscriber(message -> {
@@ -80,18 +85,24 @@ public class GhostMessage extends Plugin {
 		}));
 		this.patcher.patch(StoreChannelsSelected.class, "handleGuildSelected", new Class[]{}, this.onNavigate);
 		this.patcher.patch(StoreChannelsSelected.class, "trySelectChannel", new Class[]{long.class, long.class, Long.class, SelectedChannelAnalyticsLocation.class}, this.onNavigate);
+		this.logger.info(Utils.appActivity, "Enabled GhostMessage.");
 	}
 
-	private void disableGhosts() {
+	private void disableGhosts(boolean automatically) {
 		if (this.messagesSubscription != null) this.messagesSubscription.unsubscribe();
 		// All patches can be disabled.
 		// Normally save only ones that need to be and disable them individually here.
 		this.patcher.unpatchAll();
+		if (automatically) {
+			this.logger.info(Utils.appActivity, "Disabled GhostMessage automatically.");
+		} else {
+			this.logger.info(Utils.appActivity, "Disabled GhostMessage.");
+		}
 	}
 
 	@Override
 	public void stop(Context context) {
-		this.disableGhosts();
+		this.toggleGhosts(false);
 		this.patcher.unpatchAll();
 		this.commands.unregisterAll();
 	}
