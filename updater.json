@@ -1,10 +1,10 @@
 {
     "GhostMessage": {
-        "version": "1.0.4",
-        "minimumDiscordVersion": 80202
+        "version": "1.0.5",
+        "minimumDiscordVersion": 81110
     },
     "default": {
-        "minimumDiscordVersion": 80202,
+        "minimumDiscordVersion": 81110,
         "version": "1.0.0",
         "build": "https://raw.githubusercontent.com/Kyza/AliucordPlugins/builds/%s.zip"
     }
