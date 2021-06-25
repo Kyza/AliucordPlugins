@@ -10,8 +10,11 @@ import com.aliucord.api.CommandsAPI;
 import com.aliucord.entities.Plugin;
 import com.aliucord.patcher.PinePatchFn;
 import com.aliucord.utils.RxUtils;
+import com.aliucord.wrappers.messages.MessageWrapper;
 import com.discord.api.commands.ApplicationCommandType;
+import com.discord.api.utcdatetime.UtcDateTime;
 import com.discord.models.commands.ApplicationCommandOption;
+import com.discord.models.user.CoreUser;
 import com.discord.stores.SelectedChannelAnalyticsLocation;
 import com.discord.stores.StoreChannelsSelected;
 import com.discord.stores.StoreStream;
@@ -35,7 +38,7 @@ public class GhostMessage extends Plugin {
 		Manifest manifest = new Manifest();
 		manifest.authors = new Manifest.Author[]{ new Manifest.Author("Kyza", 220584715265114113L) };
 		manifest.description = "Deletes all messages you send immediately.";
-		manifest.version = "1.0.4";
+		manifest.version = "1.0.5";
 		manifest.updateUrl = "https://raw.githubusercontent.com/Kyza/AliucordPlugins/builds/updater.json";
 		return manifest;
 	}
@@ -79,7 +82,9 @@ public class GhostMessage extends Plugin {
 	private void enableGhosts() {
 		this.messagesSubscription = RxUtils.subscribe(RxUtils.onBackpressureBuffer(StoreStream.getGatewaySocket().getMessageCreate()), RxUtils.createActionSubscriber(message -> {
 			if (message == null) return;
-			if (message.getEditedTimestamp() == 0 && message.getAuthor().i() == StoreStream.getUsers().getMe().getId() && StoreStream.getChannelsSelected().getId() == message.getChannelId()) {
+			MessageWrapper wrappedMessage = new MessageWrapper(message);
+			CoreUser coreUser = new CoreUser(wrappedMessage.getAuthor());
+			if (wrappedMessage.getEditedTimestamp() == null && coreUser.getId() == StoreStream.getUsers().getMe().getId() && StoreStream.getChannelsSelected().getId() == wrappedMessage.getChannelId()) {
 				StoreStream.getMessages().deleteMessage(message);
 			}
 		}));
