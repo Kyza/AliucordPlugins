@@ -10,9 +10,10 @@ import com.aliucord.api.CommandsAPI;
 import com.aliucord.entities.Plugin;
 import com.aliucord.patcher.PinePatchFn;
 import com.aliucord.utils.RxUtils;
+import com.aliucord.wrappers.messages.MessageWrapper;
 import com.discord.api.commands.ApplicationCommandType;
+import com.discord.api.utcdatetime.UtcDateTime;
 import com.discord.models.commands.ApplicationCommandOption;
-import com.discord.models.message.Message;
 import com.discord.models.user.CoreUser;
 import com.discord.stores.SelectedChannelAnalyticsLocation;
 import com.discord.stores.StoreChannelsSelected;
@@ -27,7 +28,7 @@ public class GhostMessage extends Plugin {
 	private static Logger logger = new Logger("GhostMessage");
 	private Subscription messagesSubscription;
 
-	private static ApplicationCommandOption enabledArg = new ApplicationCommandOption(ApplicationCommandType.BOOLEAN, "enabled", "Whether to enable or disable deleting messages.", null, true, false, null, null);
+	private static ApplicationCommandOption enabledArg = new ApplicationCommandOption(ApplicationCommandType.INTEGER, "id", "The ID of the message to react to.", null, true, false, null, null);
 	private static ApplicationCommandOption permanentArg = new ApplicationCommandOption(ApplicationCommandType.BOOLEAN, "permanent", "Whether to automatically disable deleting messages.", null, false, false, null, null);
 	private static List<ApplicationCommandOption> arguments = Arrays.asList(enabledArg, permanentArg);
 
@@ -36,32 +37,32 @@ public class GhostMessage extends Plugin {
 	public Manifest getManifest() {
 		Manifest manifest = new Manifest();
 		manifest.authors = new Manifest.Author[]{ new Manifest.Author("Kyza", 220584715265114113L) };
-		manifest.description = "Deletes all messages you send immediately.";
-		manifest.version = "1.0.5";
+		manifest.description = "Adds a command and button to react on message with regional indicators.";
+		manifest.version = "1.0.0";
 		manifest.updateUrl = "https://raw.githubusercontent.com/Kyza/AliucordPlugins/builds/updater.json";
 		return manifest;
 	}
 
 	@Override
 	public void start(Context context) {
-		this.commands.registerCommand("ghostmessage", "Enables or disables GhostMessage.", arguments, args -> {
+		this.commands.registerCommand("textreact", "React with text to a message.", arguments, args -> {
 			boolean enabled = (boolean)args.get("enabled");
 			boolean permanent = (boolean)this.nullish(args.get("permanent"), false);
 
-			this.settings.setBool("permanent", permanent);
+			this.sets.setBool("permanent", permanent);
 			this.toggleGhosts(enabled);
 
 			return new CommandsAPI.CommandResult(null, null, false);
 		});
 
-		if (this.settings.getBool("enabled", false)) {
+		if (this.sets.getBool("enabled", false)) {
 			this.toggleGhosts(true);
 		}
 	}
 
 	private PinePatchFn onNavigate = new PinePatchFn(callFrame -> {
-		if (this.settings.getBool("enabled", false) && !this.settings.getBool("permanent", false)) {
-			this.settings.setBool("enabled", false);
+		if (this.sets.getBool("enabled", false) && !this.sets.getBool("permanent", false)) {
+			this.sets.setBool("enabled", false);
 			this.toggleGhosts(false, true);
 		}
 	});
@@ -70,7 +71,7 @@ public class GhostMessage extends Plugin {
 		this.toggleGhosts(enable, false);
 	}
 	private void toggleGhosts(boolean enable, boolean automatically) {
-		this.settings.setBool("enabled", enable);
+		this.sets.setBool("enabled", enable);
 		if (enable) {
 			this.enableGhosts();
 		} else {
@@ -81,10 +82,10 @@ public class GhostMessage extends Plugin {
 	private void enableGhosts() {
 		this.messagesSubscription = RxUtils.subscribe(RxUtils.onBackpressureBuffer(StoreStream.getGatewaySocket().getMessageCreate()), RxUtils.createActionSubscriber(message -> {
 			if (message == null) return;
-			Message modelMessage = new Message(message);
-			CoreUser coreUser = new CoreUser(modelMessage.getAuthor());
-			if (modelMessage.getEditedTimestamp() == null && coreUser.getId() == StoreStream.getUsers().getMe().getId() && StoreStream.getChannelsSelected().getId() == modelMessage.getChannelId()) {
-				StoreStream.getMessages().deleteMessage(modelMessage);
+			MessageWrapper wrappedMessage = new MessageWrapper(message);
+			CoreUser coreUser = new CoreUser(wrappedMessage.getAuthor());
+			if (wrappedMessage.getEditedTimestamp() == null && coreUser.getId() == StoreStream.getUsers().getMe().getId() && StoreStream.getChannelsSelected().getId() == wrappedMessage.getChannelId()) {
+				StoreStream.getMessages().deleteMessage(message);
 			}
 		}));
 		this.patcher.patch(StoreChannelsSelected.class, "handleGuildSelected", new Class[]{}, this.onNavigate);
