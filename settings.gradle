@@ -1,6 +1,6 @@
 include ':GhostMessage'
-//include ':TextReact'
 rootProject.name = "plugins"
+//include ':TextReact'
 
 include ':DiscordStubs'
 project(':DiscordStubs').projectDir = new File('./repo/DiscordStubs')
